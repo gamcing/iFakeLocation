@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<title>iFakeLocation</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<script src="babel.polyfill.min.js"></script>
 		<script src="fetch.min.js"></script>
 		<script src="jquery-3.3.1.min.js"></script>
@@ -18,53 +19,62 @@
 		<div class="p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
 			<div class="d-flex flex-column align-items-center flex-md-row container">
 				<h4 class="my-0 mr-md-auto font-weight-normal">iFakeLocation</h4>
-				<a id="about-btn" class="btn btn-outline-primary pl-4 pr-4" href="#" title="iFakeLocation">About</a>
-				<a id="exit-btn" class="btn btn-outline-primary pl-4 pr-4 ml-4" href="#" title="iFakeLocation" onclick="window.open('', '_self', ''); window.close();">Exit</a>
+				<a id="about-btn" class="btn btn-outline-primary pl-4 pr-4" href="#" title="iFakeLocation">关于</a>
+				<a id="exit-btn" class="btn btn-outline-primary pl-4 pr-4 ml-4" href="#" title="iFakeLocation" onclick="window.open('', '_self', ''); window.close();">退出</a>
 			</div>
 		</div>
 		<div class="container">
 			<form>
 				<div class="mb-3">
-					<label for="device">Device Name:</label><br>
+					<label for="device">iOS设备名称:</label><br>
 					<div class="row">
 						<div class="col">
 							<select class="custom-select d-block w-100" id="device" required>
 							</select>
 						</div>
 						<div class="col-md-auto">
-							<button type="button" class="btn btn-primary pl-4 pr-4" id="refresh">Refresh</button>
+							<button type="button" class="btn btn-primary pl-4 pr-4" id="refresh">刷新设备列表</button>
 						</div>
 					</div>
 				</div>
 			</form>
-			
 			<div id="map" style="width: 100%; height: 500px; max-height: 70vh"></div>
-			
-			<p><small>Click and drag to move the map. Use the mouse wheel or +/- buttons to zoom. Double-click anywhere (or drag the existing marker) to manually select a location.</small></p>
-			
+			<p><small>你可在地图上拖拽、使用鼠标滚轮和键盘的+/-按键对地图进行放大/缩小。使用鼠标双击地图上任意位置（或拖动已经标记的地图戳记），即可确定虚拟位置的具体坐标。</small></p>
 			<form>
 				<div class="mb-3">
 					<div class="row align-items-center">
 						<div class="col-md-auto">
-							<label class="mb-0" for="device">Location Search:</label>
+							<label class="mb-0" for="device">位置搜索:</label>
 						</div>
 						<div class="col">
-							<input type="text" class="form-control" id="query">
+							<input type="text" class="form-control" id="query" />
 						</div>
 						<div class="col-md-auto">
-							<button type="button" class="btn btn-primary pl-4 pr-4" id="search">Search</button>
+							<button type="button" class="btn btn-primary pl-4 pr-4" id="search">搜索坐标</button>
 						</div>
 					</div>
 				</div>
 			</form>
-			
 			<div class="mb-3">
 				<div class="row align-items-center">
 					<div class="col">
-						<button type="button" class="btn btn-primary w-100" data-toggle="popover" id="set-location" disabled>Set Fake Location</button>
+						<input type="text" class="form-control w-100" id="lat-text" placeholder="北纬(lat)" />
 					</div>
 					<div class="col">
-						<button type="button" class="btn btn-primary w-100" data-toggle="popover" id="stop-location" disabled>Stop Fake Location</button>
+						<input type="text" class="form-control w-100" id="lng-text" placeholder="东经(lng)" />
+					</div>
+					<div class="col-md-auto">
+						<button type="button" class="btn btn-primary pl-4 pr-4" id="change-latlng">手动更改坐标</button>
+					</div>
+				</div>
+			</div>
+			<div class="mb-3">
+				<div class="row align-items-center">
+					<div class="col">
+						<button type="button" class="btn btn-primary w-100" data-toggle="popover" id="set-location" disabled>设置虚拟位置</button>
+					</div>
+					<div class="col">
+						<button type="button" class="btn btn-primary w-100" data-toggle="popover" id="stop-location" disabled>还原真实位置</button>
 					</div>
 				</div>
 			</div>
@@ -74,7 +84,7 @@
 				<div class="modal-content">
 					<div class="modal-header">
 						<h5 class="modal-title">iFakeLocation</h5>
-						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<button type="button" class="close" data-dismiss="modal" aria-label="关闭">
 							<span aria-hidden="true">&times;</span>
 						</button>
 					</div>
@@ -82,7 +92,7 @@
 						<p></p>
 					</div>
 					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
 					</div>
 				</div>
 			</div>
@@ -152,6 +162,10 @@
 				});
 			});
 			
+			// Load device list as soon as the document is ready
+			$(document).ready(function(){
+				$('#refresh').click();
+			})
 			// Populate device list upon clicking refresh
 			$('#refresh').click(function() {
 				var b = $(this).attr('disabled', true);
@@ -207,7 +221,8 @@
 					headers: {
 						'Content-Type': 'application/json'
 					},
-					body: JSON.stringify({udid: dev.udid, lat: marker.getLatLng().lat, lng: marker.getLatLng().lng })
+					body: JSON.stringify({udid: dev.udid, lat: $('#lat-text').val(), lng: $('#lng-text').val() })
+					//body: JSON.stringify({udid: dev.udid, lat: marker.getLatLng().lat, lng: marker.getLatLng().lng })
 				}).then(function(e) {
 					return e.json()
 				}).then(function(r) {
@@ -217,7 +232,8 @@
 					} else {
 						$('#set-location').popover({
 							html: true,
-							content: 'Location has been succesfully set. Confirm using Maps or other apps.',
+							content: '虚拟定位已设定。请在iOS设备上确认。',
+							//content: 'Location has been succesfully set. Confirm using Maps or other apps.',
 							trigger: 'manual',
 							placement: 'bottom'
 						});
@@ -248,7 +264,8 @@
 					} else {
 						$('#stop-location').popover({
 							html: true,
-							content: 'Fake location has been stopped. If your location is still stuck, try turning Location Services off and back on.',
+							content: '已还原iOS的真实定位功能。',
+							//content: 'Fake location has been stopped. If your location is still stuck, try turning Location Services off and back on.',
 							trigger: 'manual',
 							placement: 'bottom'
 						});
@@ -315,10 +332,22 @@
 					marker = new L.marker(e.latlng, {draggable: true}).addTo(map);
 				else
 					marker.setLatLng(e.latlng);
+				console.log(e);
+				$('#lat-text').val(marker.getLatLng().lat);
+				$('#lng-text').val(marker.getLatLng().lng);
 				if (devices && devices.length)
 					$('#set-location').removeAttr('disabled');
 			});
 			
+			$('#change-latlng').click(function(){{
+				if (!marker)
+					marker = new L.marker([Number($('#lat-text').val()), Number($('#lng-text').val())], {draggable: true}).addTo(map);
+				else
+					marker.setLatLng([Number($('#lat-text').val()), Number($('#lng-text').val())]);
+				if (marker)
+					$('#set-location').removeAttr('disabled');
+			}});
+
 			// Handle search button
 			$('#search').click(function() {
 				if (!$('#query').val())
@@ -332,6 +361,8 @@
 						else
 							marker.setLatLng([r[0].y, r[0].x]);
 						map.setView([r[0].y, r[0].x], 13);
+						$('#lat-text').val(r[0].y);
+						$('#lng-text').val(r[0].x);
 						if (devices && devices.length)
 							$('#set-location').removeAttr('disabled');
 					}
